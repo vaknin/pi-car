@@ -7,6 +7,9 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const opencv = require('opencv4nodejs');
+const cam = new opencv.VideoCapture(0);
+const FPS = 8;
 
 // GPIO
 const gpio = require('onoff').Gpio;
@@ -19,10 +22,7 @@ const input4 = new gpio(22, 'out');
 
 //#region Connectivity
 
-// Listen on port
-server.listen(port);
-
-// Send index.html
+// Serve the webpage
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile(`${__dirname}/public/index.html`);
@@ -56,13 +56,18 @@ function sleep(seconds){
 // Main method
 function main(){
 
-    // Stop the car
-    input1.write(0);
-    input2.write(0);
-    input3.write(0);
-    input4.write(0);
+    // Public website
+    server.listen(port);
 
-    console.log('Server is ready.');
+    // Send a picture every second
+    setInterval(() => {
+        const frame = cam.read();
+        const image = opencv.imencode('.jpg', frame).toString('base64');
+        io.emit('image', image);
+    }, 1000 / FPS);
+    
+    // Notify that the server is running
+    console.log(`Server is running on port ${port}...`);
 }
 
 // Drive to a certain direction

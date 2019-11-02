@@ -4,38 +4,6 @@ body {
     padding: 0;
 }
 
-#forward {
-    position: fixed;
-    background-color: black;
-    width: 100px;
-    height: 100px;
-    left: 50%;
-    top: 10%;
-}
-
-#reverse {
-    position: fixed;
-    background-color: black;
-    width: 100px;
-    height: 100px;
-    left: 50%;
-    top: 60%;
-}
-
-#left {
-    position: fixed;
-    background-color: black;
-    width: 100px;
-    height: 100px;
-    left: 35%;
-    top: 35%;
-}
-
-#right {
-    position: fixed;
-    background-color: black;
-    width: 100px;
-    height: 100px;
-    left: 65%;
-    top: 35%;
+#image {
+    text-align: center;
 }
