@@ -9,7 +9,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const opencv = require('opencv4nodejs');
 const cam = new opencv.VideoCapture(0);
-const FPS = 8;
+const FPS = 5;
 
 // GPIO
 const gpio = require('onoff').Gpio;
@@ -31,7 +31,6 @@ app.get('/', (req, res) => {
 // Receving instructions from the client
 io.on('connection', socket => {
     socket.on('drive', direction => {
-
         // Drive
         drive(direction);
     });
