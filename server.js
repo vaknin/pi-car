@@ -137,6 +137,110 @@ async function patrol(){
     }
 }
 
+// Scan the house
+async function scan(){
+
+    // Update the house array
+    function map(distance, direction){
+        
+        // Round down the distance traveled
+        distance = Math.floor(distance);
+
+        // Axis consts
+        const X = 'x';
+        const Y = 'x';
+        
+        // Fetch the current position
+        let x = position.x;
+        let y = position.y;
+
+        let axis, delta;
+
+        // Travel along the y-axis
+        if (direction == FORWARD || direction == REVERSE){
+
+            axis = Y;
+
+            // Travel forward
+            if (direction == FORWARD){
+                position.y -= distanceTraveled;
+                delta = -1;
+            }
+
+            // Reverse
+            else{
+                position.y += distanceTraveled;
+                delta = 1;
+            }
+        }
+
+        // Travel along the x-axis
+        else{
+
+            axis = Y;
+
+            // Travel forward
+            if (direction == LEFT){
+                position.x -= distanceTraveled;
+                delta = -1;
+            }
+
+            // Right
+            else{
+                position.x += distanceTraveled;
+                delta = 1;
+            }
+        }
+
+        // Add the path to the house array
+        for (let i = 0; i < distance; i++){
+
+            // X-axis
+            if (axis == X) x += delta;
+
+            // Y-axis
+            else y += delta;
+
+            // Map the position
+            if (!house.includes([x,y])){
+                house.push([x, y]);
+            }
+        }
+
+    }
+
+    let house = [];
+    let position = {
+        x: 0,
+        y: 0
+    };
+
+    // The direction to drive
+    let direction = FORWARD;
+
+    // Scan loop
+    while(true){
+
+        // Keep driving until you hit an obstacle, once you reach one, the distance traveled returns
+        const distanceTraveled = await drive(direction);
+
+        // Travel along the y-axis
+        if (direction == FORWARD || REVERSE){
+            direction == FORWARD ? position.y -= distanceTraveled : position.y += distanceTraveled;
+        }
+
+        // Travel along the x-axis
+        else{
+            direction == LEFT ? position.x -= distanceTraveled : position.x += distanceTraveled;
+        }
+
+        map(distanceTraveled, direction);
+
+        // Change driving direction
+
+    }
+}
+
 //#endregion
 
 main();
