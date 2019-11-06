@@ -11,12 +11,19 @@ const opencv = require('opencv4nodejs');
 const cam = new opencv.VideoCapture(0);
 const FPS = 5;
 
+// Direction consts
+const FORWARD = 'forward';
+const REVERSE = 'reverse';
+const RIGHT = 'right';
+const LEFT = 'left';
+const STOP = 'stop';
+
 // GPIO
-const gpio = require('onoff').Gpio;
-const input1 = new gpio(4, 'out'); 
-const input2 = new gpio(17, 'out');
-const input3 = new gpio(27, 'out');
-const input4 = new gpio(22, 'out');
+const { Gpio } = require('onoff');
+const input1 = new Gpio(4, 'out'); 
+const input2 = new Gpio(17, 'out');
+const input3 = new Gpio(27, 'out');
+const input4 = new Gpio(22, 'out');
 
 //#endregion
 
@@ -30,23 +37,13 @@ app.get('/', (req, res) => {
 
 // Receving instructions from the client
 io.on('connection', socket => {
-    socket.on('drive', direction => {
-        // Drive
-        drive(direction);
-    });
+
+    // Drive
+    socket.on('drive', direction => { drive(direction) });
+
+    // Start patroling
+    socket.on('patrol', () => patrol);
 });
-
-//#endregion
-
-//#region Tools
-
-// Await a certain period of time
-function sleep(seconds){
-
-    return new Promise(resolve => {
-        setTimeout(resolve, seconds * 1000);
-    });
-}
 
 //#endregion
 
@@ -70,40 +67,73 @@ function main(){
 }
 
 // Drive to a certain direction
-function drive(direction){
+function drive(direction, duration){
 
-    switch(direction){
+    return new Promise(resolve => {
 
-        case 'stop':
-            input1.write(0);
-            input2.write(0);
-            input3.write(0);
-            input4.write(0);
-        break;
-        case 'forward':
-            input1.write(1);
-            input2.write(0);
-            input3.write(1);
-            input4.write(0);
-        break;
-        case 'reverse':
-            input1.write(0);
-            input2.write(1);
-            input3.write(0);
-            input4.write(1);
-        break;
-        case 'right':
-            input1.write(1);
-            input2.write(0);
-            input3.write(0);
-            input4.write(1);
-        break;
-        case 'left':
-            input1.write(0);
-            input2.write(1);
-            input3.write(1);
-            input4.write(0);
-        break;
+        // Translate direction string to GPIO action
+        switch(direction){
+
+            case STOP:
+                input1.write(0);
+                input2.write(0);
+                input3.write(0);
+                input4.write(0);
+            break;
+
+            case FORWARD:
+                input1.write(1);
+                input2.write(0);
+                input3.write(1);
+                input4.write(0);
+            break;
+
+            case REVERSE:
+                input1.write(0);
+                input2.write(1);
+                input3.write(0);
+                input4.write(1);
+            break;
+
+            case RIGHT:
+                input1.write(1);
+                input2.write(0);
+                input3.write(0);
+                input4.write(1);
+            break;
+
+            case LEFT:
+                input1.write(0);
+                input2.write(1);
+                input3.write(1);
+                input4.write(0);
+            break;
+        }
+
+        // A duration was specified
+        if (duration){
+            setTimeout(() => {
+                drive(STOP);
+                resolve();
+            }, duration * 1000);
+        }
+
+        // No duration specified, return TODO: is this line needed?
+        else resolve();
+    });
+}
+
+// The car will patrol
+async function patrol(){
+
+    // Loop forever
+    while (true){
+        await drive(FORWARD, 2.3);
+        await drive(LEFT, 0.2);
+        await drive(FORWARD, 0.1);
+        await drive(LEFT, 0.2);
+        await drive(FORWARD, 0.1);
+        await drive(LEFT, 0.2);
     }
 }
 
